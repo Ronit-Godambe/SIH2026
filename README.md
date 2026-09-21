@@ -1,359 +1,548 @@
 Live Preview - https://ronit-godambe.github.io/SIH2026/
 
-
-
 # 🚆 Dynamic ETA Forecasting — Goa Express
 
 ### Smart India Hackathon 2026 · Problem Statement 26028
 
-A web-based prototype demonstrating **dynamic Expected Time of Arrival (ETA) forecasting for coaching trains**.
-
-The project demonstrates how future train arrival times can be continuously updated using the train's current state, historical running patterns, congestion, signal conditions, and other operational factors.
+A web-based prototype demonstrating **dynamic ETA forecasting for coaching trains** using real-time train conditions, historical running patterns, signal conditions, congestion, and weather factors.
 
 ---
 
 ## 📌 Problem Statement
 
-### Dynamic Forecast of Expected Time of Arrival (ETA) for Coaching Trains
+Indian Railways operates thousands of trains across a large and complex railway network.
 
-Train delays are not static.
+Traditional ETA estimation primarily depends on:
 
-A train that is currently 10 minutes late may experience additional delays because of:
+- Scheduled timetable
+- Current train location
+- Accumulated delay
+- Average running time
+
+However, actual train movement is affected by constantly changing conditions such as:
 
 - Downstream congestion
 - Signal restrictions
 - Weather conditions
-- Sectional running-time variations
 - Historical delay patterns
+- Sectional running variations
 - Network conditions
 
-Therefore, simply adding the current delay to the scheduled timetable may not provide an accurate estimate of future arrival times.
-
-The objective is to develop a system capable of **continuously forecasting and updating the ETA of trains at future stations**.
+The objective is to develop a system that can **continuously forecast the expected arrival time of a train at future stations** by considering these changing conditions.
 
 ---
 
 ## 🚉 Existing Railway Information Systems
 
-Indian Railways already has systems that provide train-position and operational information.
+Indian Railways already has systems that provide operational and train-related information.
 
 Examples include:
 
-- **RTIS** — Real-time Train Information System
+- **RTIS** — Real-Time Train Information System
 - **COA** — Control Office Application
 - **NTES** — National Train Enquiry System
 
-These systems provide important information about the current state and movement of trains.
+These systems can provide information such as train location, movement and operational status.
 
-Our project focuses on the **predictive layer**:
+However, the proposed system focuses specifically on an additional layer:
 
-> Instead of only asking where the train is now, can we continuously estimate where it will reach next?
+> **Predicting what is likely to happen next.**
+
+Instead of only reporting the current delay, the system attempts to estimate how that delay may evolve along the remaining journey.
 
 ---
 
-## 🧠 Proposed Solution
+## 💡 Proposed Solution
 
-The proposed system acts as a **Dynamic ETA Prediction Layer** over existing railway information systems.
+The proposed system combines multiple data sources to continuously calculate a dynamic ETA.
 
-It considers multiple factors:
+### Input Parameters
+
+The prediction engine considers:
+
+- 📍 Current train location
+- 🚆 Current train speed
+- ⏱️ Current accumulated delay
+- 🚦 Signal aspects and restrictions
+- 🚧 Downstream congestion
+- 🌧️ Weather conditions
+- 📊 Historical sectional running times
+- 🕐 Scheduled timetable
+- 🛤️ Railway network conditions
+
+The system continuously updates the prediction whenever new information becomes available.
+
+---
+
+## 🧠 Dynamic ETA Concept
+
+Instead of simply calculating:
 
 ```text
-Train Location
-      +
-Current Delay
-      +
-Historical Running Time
-      +
-Signal Conditions
-      +
-Downstream Congestion
-      +
-Weather
-      ↓
-ETA Prediction Engine
-      ↓
-Updated Future ETA
-
-
-Whenever railway conditions change, the predicted ETA can be recalculated.
-
-🚆 Demonstration — Goa Express
-
-The prototype uses Goa Express (12779) as a demonstration train.
-
-The journey is represented as a compressed simulation from:
-
-Vasco da Gama → Hazrat Nizamuddin
-
-The demonstration includes stations such as:
-
-Vasco da Gama
-Madgaon Jn
-Belagavi
-Miraj Jn
-Pune Jn
-Bhopal Jn
-Jhansi Jn
-Gwalior Jn
-Agra Cantt
-Mathura Jn
-Hazrat Nizamuddin
-
-⚠️ The journey data used in the prototype is simulated for demonstration purposes and is not a live Indian Railways data feed.
-
-⚡ Live Demonstration
-
-The main part of the prototype compares two approaches.
-
-Conventional ETA Baseline
-
-The baseline uses:
-
 Scheduled Remaining Time
 +
 Current Accumulated Delay
+```
 
-This represents a simple ETA calculation.
+the proposed system estimates the additional time that may be introduced by future conditions.
 
-Dynamic ETA Engine
+Conceptually:
 
-Our proposed system additionally considers:
+```text
+Predicted Remaining Travel Time
++
+Current Time
+=
+Dynamic ETA
+```
 
+The prediction can therefore change while the train is moving.
+
+For example:
+
+```text
+Current Delay:       +8 min
+Downstream Congestion: +5 min
+Signal Restriction:    +2 min
+Historical Pattern:    +3 min
+
+Predicted Future Delay: +10 min
+
+Dynamic ETA
+= Current Time + Predicted Remaining Travel Time
+```
+
+---
+
+# 🚆 Demonstration — Goa Express
+
+The prototype demonstrates the concept using a simulated journey of the **Goa Express** from Goa to Delhi.
+
+Example route:
+
+```text
+Vasco da Gama
+      ↓
+Madgaon Jn
+      ↓
+Belagavi
+      ↓
+Miraj Jn
+      ↓
+Pune Jn
+      ↓
+Bhopal Jn
+      ↓
+Jhansi Jn
+      ↓
+Gwalior Jn
+      ↓
+Agra Cantt
+      ↓
+Mathura Jn
+      ↓
+Hazrat Nizamuddin
+```
+
+The train moves through the simulated route while the ETA engine continuously updates its prediction.
+
+---
+
+# 📡 Live Demonstration
+
+The prototype compares two approaches.
+
+## 1. Conventional ETA Baseline
+
+The conventional baseline estimates arrival using:
+
+```text
+Scheduled Remaining Time
++
+Current Delay
+```
+
+This represents a simplified timetable-based approach.
+
+---
+
+## 2. Dynamic ETA Engine
+
+The proposed engine additionally considers:
+
+```text
 Current Delay
 +
-Historical Section Behaviour
+Congestion
 +
 Signal Conditions
 +
-Downstream Congestion
+Historical Running Pattern
 +
 Weather
++
+Network Conditions
+```
 
-The ETA is recalculated as conditions change.
+The prediction is updated whenever the simulated railway conditions change.
 
-Example
+---
 
-Suppose a train currently has:
+## 🔄 Example
 
-Current Delay       +8 min
-Congestion          +5 min
-Signal Restriction  +2 min
-Historical Pattern  +3 min
+Suppose the train is currently:
 
-The dynamic prediction can account for these additional factors rather than assuming that the current delay will remain unchanged.
+```text
+Running Delay: +8 minutes
+```
 
-During the simulation, these conditions change and the ETA is updated accordingly.
+A downstream congestion event is detected.
 
-🎯 Key Features
-🚆 Train Simulation — A compressed Goa Express journey is simulated over approximately 2–3 minutes.
-📍 Live Train Position — The current location of the train changes as the simulation progresses.
-⏱️ Dynamic ETA — ETA values are continuously recalculated during the simulation.
-🚦 Signal Effects — Signal restrictions can contribute additional predicted delay.
-🚧 Congestion — Downstream congestion affects the predicted arrival time.
-📊 Historical Patterns — Historical section behaviour contributes to the prediction.
-🌧️ Weather Effects — Simulated weather conditions can influence the prediction.
-🔄 Real-Time Updates — The prediction changes as new events occur.
-📈 Baseline Comparison — Conventional and dynamic ETA calculations are displayed side-by-side.
-⏹️ Simulation Controls — The demonstration can be started and stopped.
-📱 Responsive Design — The interface is designed for desktop and mobile screens.
-🏗️ System Architecture
-                    DATA SOURCES
-                         │
-          ┌──────────────┼──────────────┐
-          │              │              │
-     Train Data      Historical     Network Data
-          │              │              │
-          └──────────────┼──────────────┘
-                         ↓
-                  Data Processing
-                         ↓
-                 Feature Engineering
-                         ↓
-                  ETA Prediction
-                         ↓
-                 Dynamic ETA Engine
-                         ↓
-              ┌──────────┼──────────┐
-              ↓          ↓          ↓
-          Passenger    Station    Control Room
-            Apps       Displays    Dashboard
-🧪 Prototype Architecture
+The dynamic engine may calculate:
 
-The current prototype is intentionally lightweight.
+```text
+Congestion Impact: +5 min
+Signal Impact:     +2 min
+Historical Impact: +3 min
+```
 
-Everything is contained inside a single:
+The system then updates the expected arrival time.
 
-index.html
+If the congestion later clears, the prediction can be reduced again.
 
-It contains:
+This demonstrates the difference between:
 
-HTML
-CSS
-JavaScript
+```text
+Static / Delay-Based ETA
+```
 
-No backend is required to run the current demonstration.
+and
 
-The simulation generates the train's movement and changing operational conditions locally in the browser.
+```text
+Dynamic / Predictive ETA
+```
 
-🛠️ Technology Stack
-Technology	Purpose
-HTML5	Page structure
-CSS3	Interface and responsive design
-JavaScript	Train simulation and ETA calculations
-Browser	Prototype execution
-🤖 Machine Learning Approach
+---
 
-A future implementation can begin with a simple baseline and progressively introduce machine-learning models.
+# ✨ Key Features
 
-Baseline
-ETA = Current Time
-      +
-Scheduled Remaining Travel Time
-      +
-Current Delay
-ML-Based Approach
+- 🚆 Real-time ETA simulation
+- 📍 Train position tracking
+- 🛤️ Station-by-station journey visualization
+- 🚦 Signal restriction simulation
+- 🚧 Downstream congestion simulation
+- 🌧️ Weather impact simulation
+- 📊 Historical delay influence
+- 🔄 Continuous ETA updates
+- 📈 Delay progression visualization
+- ⚡ Conventional vs Dynamic ETA comparison
+- 🔌 API-ready architecture
+- 📱 Suitable for passenger-facing applications
+- 🖥️ Suitable for railway control-room dashboards
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                  ┌──────────────────────┐
+                  │   Data Sources       │
+                  │                      │
+                  │ GPS / Location       │
+                  │ Signals              │
+                  │ Weather              │
+                  │ Timetable            │
+                  │ Historical Data      │
+                  │ Network Conditions  │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ Data Processing      │
+                  │ & Validation         │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ Feature Engineering  │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ ETA Prediction       │
+                  │ Engine               │
+                  │                      │
+                  │ ML / Statistical    │
+                  │ Models               │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ Dynamic ETA          │
+                  │ + Confidence Range   │
+                  └──────────┬───────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+        Passenger App   Station Display   Control Room
+```
+
+---
+
+# 🧩 Prototype Architecture
+
+The current prototype simulates the data normally required by the prediction engine.
+
+```text
+Simulated Train Data
+        │
+        ▼
+Train State Generator
+        │
+        ▼
+Event Detection
+        │
+        ├── Congestion
+        ├── Signal
+        ├── Weather
+        └── Historical Pattern
+        │
+        ▼
+ETA Calculation
+        │
+        ▼
+Live Dashboard
+```
+
+The architecture can later be connected to actual railway data feeds through APIs or other authorized data interfaces.
+
+---
+
+# 💻 Technology Stack
+
+### Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+
+### Data & Simulation
+
+- JavaScript-based real-time simulation
+- Simulated railway events
+- Historical running-time dataset
+
+### Future Backend
+
+Possible technologies include:
+
+- Python
+- FastAPI
+- Node.js
+- REST APIs
+- WebSockets
+
+### Machine Learning
 
 Potential models include:
 
-Linear Regression
-Random Forest
-Gradient Boosting
-XGBoost-style models
-Time-series / statistical forecasting models
+- Linear Regression
+- Random Forest
+- Gradient Boosting
+- XGBoost-style models
+- Time-series/statistical models
 
-The model can predict remaining travel time, after which:
+---
 
+# 🤖 Machine Learning Approach
+
+The system can initially use a simple baseline model.
+
+### Baseline
+
+```text
+ETA =
+Scheduled Remaining Time
++
+Current Delay
+```
+
+The ML model can then learn the relationship between railway conditions and actual remaining travel time.
+
+Example features:
+
+```text
+Current Speed
+Current Delay
+Distance Remaining
+Historical Section Time
+Day of Week
+Time of Day
+Weather
+Signal Condition
+Congestion Level
+Previous Section Delay
+```
+
+The model predicts:
+
+```text
+Predicted Remaining Travel Time
+```
+
+Then:
+
+```text
 ETA = Current Time + Predicted Remaining Travel Time
+```
 
-Model performance can be evaluated using:
+---
 
-MAE — Mean Absolute Error
-RMSE — Root Mean Square Error
+# 📊 Evaluation
 
-Actual performance values should be obtained from test data rather than assumed.
+The system can be evaluated by comparing predicted arrival times against actual arrival times.
 
-📈 Evaluation
+Possible metrics include:
 
-The system can compare:
+### Mean Absolute Error (MAE)
 
-Scheduled ETA
-      ↓
-Baseline ETA
-      ↓
-Dynamic ETA
-      ↓
-Actual Arrival
+```text
+MAE =
+Average |Predicted ETA - Actual ETA|
+```
 
-This allows prediction error to be measured at each station.
+### Root Mean Square Error (RMSE)
 
-Prediction
-     ↓
-Station Reached
-     ↓
-Actual Arrival Recorded
-     ↓
-Prediction Error Calculated
-     ↓
-Model Performance Evaluated
-🌐 Scalability
+```text
+RMSE =
+√(Average Prediction Error²)
+```
 
-The prototype demonstrates one simulated train.
+The dynamic model can be compared against the baseline ETA method.
 
-A production architecture could support many trains simultaneously by processing each train as an independent real-time prediction stream.
+---
 
-The architecture can eventually be extended using:
+# 📈 Scalability
 
-APIs
-Event-driven processing
-Distributed services
-Databases
-Caching
-Horizontal scaling
-Model-serving infrastructure
-🔮 Future Implementation
+The proposed architecture is designed to support multiple trains simultaneously.
 
-The current prototype uses simulated data.
+Conceptually:
 
-A production-oriented implementation could replace the simulation layer with real operational feeds such as:
+```text
+Train 1 ──┐
+Train 2 ──┤
+Train 3 ──┤
+Train 4 ──┤──► ETA Prediction Engine
+Train 5 ──┤
+Train N ──┘
+```
 
-Real-Time Train Location
-        ↓
-Signal Information
-        ↓
-Timetable Data
-        ↓
-Historical Delay Database
-        ↓
-Weather Data
-        ↓
-Network / Congestion Data
-        ↓
-ML / Statistical Model
-        ↓
-Dynamic ETA API
+A production implementation could use:
 
-The prediction engine could then continuously update ETAs for multiple trains across multiple railway zones.
+- Event-driven processing
+- Message queues
+- Caching
+- Asynchronous processing
+- Distributed services
+- Horizontal scaling
 
-💡 Core Innovation
+This would allow the system to process large numbers of train streams across different railway zones.
 
-The central idea of the project is:
+---
 
-Continuously update future train ETAs using both the current state of the train and changing conditions across the railway network.
+# 🚀 Future Implementation
 
-Instead of treating delay as a fixed value:
+The prototype can be extended with:
 
-Current Delay = Future Delay
+- Real railway data feeds
+- GPS-based train tracking
+- Live signal information
+- Weather APIs
+- Historical railway datasets
+- Railway network graphs
+- Advanced ML models
+- Confidence intervals for ETA
+- Mobile application integration
+- Station display integration
+- Control-room dashboards
+- Large-scale distributed processing
 
-the system treats delay as something that can evolve:
+---
 
-Current State
-      ↓
-Prediction
-      ↓
-New Event
-      ↓
-Updated Prediction
-      ↓
-Another Event
-      ↓
-Updated Prediction
-⚠️ Prototype Disclaimer
+# 💡 Core Innovation
 
-This project is a demonstration prototype.
+The key idea is to move from:
 
-It does not claim to reproduce the proprietary internal systems or algorithms of Indian Railways.
+```text
+"What is the train's current delay?"
+```
 
-The Goa Express journey, operational events, delays, and prediction values shown in the demo are simulated to demonstrate the concept of dynamic ETA forecasting.
+towards:
 
-🚀 Running the Prototype
+```text
+"Given the train's current state and the conditions
+ahead, when is it actually expected to arrive?"
+```
 
-No installation is required.
+The system continuously updates this prediction as the railway environment changes.
 
-Simply open:
+---
 
+# ⚠️ Prototype Disclaimer
+
+This project is a **prototype demonstration for Smart India Hackathon 2026**.
+
+The train movement, GPS information, congestion, signal conditions, weather effects and historical patterns shown in the demonstration are **simulated data**.
+
+The prototype does not claim to access or reproduce live internal Indian Railways systems.
+
+The architecture is designed to demonstrate how such data could be processed by a future production system using authorized railway data sources.
+
+---
+
+# ▶️ Running the Prototype
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+```
+
+Open the project folder:
+
+```bash
+cd <project-folder>
+```
+
+Run the prototype by opening:
+
+```text
 index.html
+```
 
 in a modern web browser.
 
-Navigate to:
+No backend server is currently required for the prototype.
 
-05 — Watch the Difference
+---
 
-Then click:
+# 👨‍💻 Author
 
-▶ START DEMO
+**Ronit Godambe**
 
-The simulation can be stopped using:
+Computer Engineering Student  
+Smart India Hackathon 2026
 
-■ STOP
-👨‍💻 Author
+---
 
-Designed and Developed by Ronit Godambe
+# 🏆 Smart India Hackathon 2026
 
-🇮🇳 Smart India Hackathon 2026
+**Problem Statement:** 26028  
+**Title:** Dynamic Forecast of Expected Time of Arrival (ETA) for Coaching Trains  
+**Organization:** Ministry of Railways  
+**Category:** Software  
+**Theme:** Smart Automation
 
-Problem Statement: 26028
-Title: Dynamic Forecast of Expected Time of Arrival (ETA) for Coaching Trains
-Organization: Ministry of Railways
-Category: Software
-Theme: Smart Automation
+---
+
+⭐ Built as a prototype to demonstrate the concept of **dynamic railway ETA forecasting**.
