@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic ETA — Goa Express</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#071018;color:#eaf2f8;line-height:1.5}
+main{max-width:1200px;margin:auto;padding:28px}
+section{background:#0d1822;border:1px solid #20313f;border-radius:18px;padding:28px;margin-bottom:22px}
+h1{font-size:clamp(32px,6vw,64px);line-height:1.05;margin-bottom:14px}
+h2{font-size:28px;margin-bottom:10px}
+h3{margin:18px 0 8px}
+p{color:#b8c7d1;max-width:850px}
+.badge{display:inline-block;border:1px solid #2b4658;border-radius:999px;padding:6px 11px;color:#8fd3ff;font-size:13px;margin-bottom:15px}
+.hero{min-height:330px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#0d1c28,#081118)}
+.hero strong{color:#8fd3ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:20px}
+.card{background:#09131c;border:1px solid #20313f;border-radius:14px;padding:18px}
+.route{display:flex;gap:8px;align-items:center;overflow:auto;padding:20px 0}
+.station{min-width:105px;text-align:center}
+.dot{width:13px;height:13px;border-radius:50%;background:#6fc8ff;margin:8px auto}
+.line{height:3px;background:#315061;min-width:45px}
+.demo{background:#08131b}
+button{border:0;border-radius:10px;padding:12px 18px;background:#75c8ff;color:#061018;font-weight:800;cursor:pointer;font-size:15px}
+button:disabled{opacity:.5;cursor:default}
+.demo-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.status{color:#77e0a3;font-weight:800}
+.simgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.panel{background:#0b1720;border:1px solid #223846;border-radius:14px;padding:18px}
+.panel h3{margin-top:0}
+.metric{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1c2b35;color:#b8c7d1}
+.metric b{color:#fff}
+.big{font-size:31px;font-weight:800;color:#8fd3ff;margin:8px 0}
+.event{margin-top:14px;background:#101f2a;border-left:4px solid #75c8ff;padding:12px;border-radius:7px}
+.progress{height:8px;background:#182833;border-radius:99px;overflow:hidden;margin:14px 0}
+.bar{height:100%;width:0;background:#75c8ff;transition:width .25s}
+footer{text-align:center;color:#7f929e;padding:25px}
+@media(max-width:720px){main{padding:14px}.simgrid{grid-template-columns:1fr}.route{padding-bottom:8px}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+<span class="badge">SIH 2026 · PS 26028</span>
+<h1>Dynamic Forecast of<br><strong>Expected Time of Arrival</strong></h1>
+<p>Can we move from simply knowing where a train is now to continuously forecasting where it will actually reach next?</p>
+</section>
+
+<section>
+<h2>01 — The Problem</h2>
+<p>Train delays are dynamic. A train may be running late now, but congestion, signals, weather, sectional running times and network conditions can make its future delay increase or decrease.</p>
+<div class="grid">
+<div class="card"><h3>Current state</h3><p>Where is the train? How late is it right now?</p></div>
+<div class="card"><h3>Future state</h3><p>When will it actually reach each upcoming station?</p></div>
+<div class="card"><h3>The challenge</h3><p>Continuously update that forecast as new events occur.</p></div>
+</div>
+</section>
+
+<section>
+<h2>02 — What Railways Already Has</h2>
+<p>Indian Railways already has systems for real-time train information and operational management. RTIS provides train-position information, while systems such as COA support railway control operations and forecasting. NTES exposes train-running information to passengers.</p>
+<div class="grid">
+<div class="card"><h3>RTIS</h3><p>Real-time train positioning and movement information.</p></div>
+<div class="card"><h3>COA</h3><p>Control-office operational information and train movement management.</p></div>
+<div class="card"><h3>NTES</h3><p>Passenger-facing train running and enquiry information.</p></div>
+</div>
+<p style="margin-top:18px"><strong>The opportunity:</strong> add a predictive intelligence layer that continuously combines current state, historical behaviour and changing network conditions.</p>
+</section>
+
+<section>
+<h2>03 — What Are They Expecting From Us?</h2>
+<div class="grid">
+<div class="card"><h3>Inputs</h3><p>Train location · speed · current delay · signals · historical section times · weather · downstream congestion.</p></div>
+<div class="card"><h3>Prediction</h3><p>Use statistical / ML forecasting to estimate remaining travel time and future station ETAs.</p></div>
+<div class="card"><h3>Dynamic updates</h3><p>When conditions change, recalculate the ETA instead of keeping a static prediction.</p></div>
+</div>
+</section>
+
+<section>
+<h2>04 — Goa Express</h2>
+<p><strong>Demo train:</strong> Goa Express (12779), represented here with a compressed, simulated journey from Vasco da Gama to Hazrat Nizamuddin. The simulation data is for demonstration and is not claimed to be a live railway feed.</p>
+<div class="route" id="route"></div>
+</section>
+
+<section class="demo">
+<div class="demo-top">
+<div><span class="badge">LIVE SIMULATION</span><h2>05 — Watch the Difference</h2></div>
+<button id="start">▶ START DEMO</button>
+</div>
+<p>The baseline uses scheduled remaining time plus accumulated delay. Our dynamic engine additionally reacts to simulated congestion, signal restrictions and historical section behaviour.</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="simgrid">
+<div class="panel">
+<h3>CONVENTIONAL ETA BASELINE</h3>
+<div class="big" id="baseEta">--:--</div>
+<div class="metric"><span>Current delay</span><b id="baseDelay">+0 min</b></div>
+<div class="metric"><span>Method</span><b>Schedule + current delay</b></div>
+</div>
+<div class="panel">
+<h3>DYNAMIC ETA ENGINE</h3>
+<div class="big" id="ourEta">--:--</div>
+<div class="metric"><span>Predicted delay</span><b id="ourDelay">+0 min</b></div>
+<div class="metric"><span>Congestion impact</span><b id="congestion">+0 min</b></div>
+<div class="metric"><span>Signal impact</span><b id="signal">+0 min</b></div>
+<div class="metric"><span>Historical impact</span><b id="history">+0 min</b></div>
+</div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3>TRAIN STATUS</h3>
+<div class="metric"><span>Train</span><b>Goa Express · 12779</b></div>
+<div class="metric"><span>Current station / section</span><b id="currentStation">Vasco da Gama</b></div>
+<div class="metric"><span>Actual delay</span><b id="actualDelay">+0 min</b></div>
+<div class="metric"><span>Next station ETA</span><b id="nextEta">--:--</b></div>
+</div>
+<div class="event" id="event">Press START DEMO to begin the compressed journey.</div>
+</section>
+
+<section>
+<h2>06 — What We Are Doing</h2>
+<p>We are proposing a predictive layer over existing railway information systems. In a real deployment, live operational feeds could replace the simulated inputs used here.</p>
+<div class="grid">
+<div class="card"><h3>1. Data ingestion</h3><p>Collect train state, timetable, historical running patterns and network conditions.</p></div>
+<div class="card"><h3>2. Feature engineering</h3><p>Convert raw operational data into useful prediction features for each train and section.</p></div>
+<div class="card"><h3>3. ETA model</h3><p>Predict remaining travel time, then calculate ETA for upcoming stations.</p></div>
+<div class="card"><h3>4. Continuous update</h3><p>Recalculate whenever a meaningful change in the train or network is detected.</p></div>
+</div>
+</section>
+
+<footer>Designed and Developed by <strong>Ronit Godambe</strong></footer>
+</main>
+
+<script>
+const stations=[
+["Vasco da Gama","15:10"],["Madgaon Jn","15:30"],["Belagavi","19:35"],
+["Miraj Jn","22:40"],["Pune Jn","04:15"],["Bhopal Jn","19:10"],
+["Jhansi Jn","23:15"],["Gwalior Jn","00:18"],["Agra Cantt","03:15"],
+["Mathura Jn","04:00"],["Hazrat Nizamuddin","06:25"]
+];
+const route=document.getElementById("route");
+stations.forEach((s,i)=>{
+ const d=document.createElement("div"); d.className="station";
+ d.innerHTML=`<div>${s[0]}</div><div class="dot"></div><small>${s[1]}</small>`;
+ route.appendChild(d);
+ if(i<stations.length-1){const l=document.createElement("div");l.className="line";route.appendChild(l)}
+});
+
+const events=[
+ {t:10,station:"Vasco da Gama → Madgaon",c:0,s:0,h:1,msg:"Departure recorded. Train begins with a small historical variance."},
+ {t:24,station:"Madgaon → Belagavi",c:3,s:0,h:2,msg:"Historical section pattern detected: dynamic ETA adjusts."},
+ {t:42,station:"Belagavi → Miraj",c:6,s:2,h:3,msg:"Downstream congestion detected. Dynamic forecast increases."},
+ {t:60,station:"Miraj → Pune",c:4,s:1,h:2,msg:"Congestion begins clearing; predicted remaining delay is revised."},
+ {t:78,station:"Pune → Bhopal",c:7,s:3,h:3,msg:"Signal restriction detected ahead. ETA updates again."},
+ {t:98,station:"Bhopal → Jhansi",c:2,s:0,h:2,msg:"Network conditions improve; dynamic forecast reduces."},
+ {t:118,station:"Jhansi → Delhi",c:5,s:1,h:2,msg:"Final downstream congestion detected."}
+];
+let timer=null,startTime=0,duration=130000;
+function fmt(total){
+ total=((Math.round(total)%1440)+1440)%1440;
+ return String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
+}
+function tick(){
+ const elapsed=(Date.now()-startTime)/1000, pct=Math.min(100,elapsed/130*100);
+ document.getElementById("bar").style.width=pct+"%";
+ const idx=Math.min(stations.length-1,Math.floor(pct/100*(stations.length-1)));
+ document.getElementById("currentStation").textContent=stations[idx][0];
+ let ev=events[0]; for(const e of events) if(elapsed>=e.t) ev=e;
+ const dynamic=8+ev.c+ev.s+ev.h, baseline=8+Math.max(0,Math.floor(elapsed/30));
+ document.getElementById("baseDelay").textContent="+"+baseline+" min";
+ document.getElementById("ourDelay").textContent="+"+dynamic+" min";
+ document.getElementById("actualDelay").textContent="+"+Math.max(0,dynamic-1)+" min";
+ document.getElementById("congestion").textContent="+"+ev.c+" min";
+ document.getElementById("signal").textContent="+"+ev.s+" min";
+ document.getElementById("history").textContent="+"+ev.h+" min";
+ document.getElementById("baseEta").textContent=fmt(840+baseline);
+ document.getElementById("ourEta").textContent=fmt(840+dynamic);
+ document.getElementById("nextEta").textContent=fmt(840+dynamic);
+ document.getElementById("event").textContent="EVENT: "+ev.msg;
+ if(pct>=100){clearInterval(timer);document.getElementById("start").disabled=false;document.getElementById("start").textContent="↻ RESTART DEMO";document.getElementById("event").textContent="DEMO COMPLETE: predicted ETAs were continuously updated throughout the simulated journey."}
+}
+document.getElementById("start").onclick=()=>{
+ clearInterval(timer);startTime=Date.now();document.getElementById("start").disabled=true;document.getElementById("start").textContent="SIMULATION RUNNING…";tick();timer=setInterval(tick,250);
+};
+</script>
+</body>
+</html>
