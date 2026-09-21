@@ -37,7 +37,131 @@ button:disabled{opacity:.5;cursor:default}
 .progress{height:8px;background:#182833;border-radius:99px;overflow:hidden;margin:14px 0}
 .bar{height:100%;width:0;background:#75c8ff;transition:width .25s}
 footer{text-align:center;color:#7f929e;padding:25px}
-@media(max-width:720px){main{padding:14px}.simgrid{grid-template-columns:1fr}.route{padding-bottom:8px}}
+@media (max-width: 720px) {
+
+    main {
+        padding: 10px;
+        width: 100%;
+    }
+
+    section {
+        padding: 20px 16px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+    }
+
+    h1 {
+        font-size: 38px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    h3 {
+        font-size: 17px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+
+    /* Section 04 route */
+    .route {
+        width: 100%;
+        overflow-x: auto;
+        padding: 18px 5px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .station {
+        min-width: 95px;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .line {
+        min-width: 30px;
+        flex-shrink: 0;
+    }
+
+    /* Section 05 header */
+    .demo-top {
+        align-items: flex-start;
+    }
+
+    .demo-top > div {
+        width: 100%;
+    }
+
+    /* Start + Stop buttons */
+    .demo-top > div:last-child {
+        display: flex;
+        width: 100%;
+    }
+
+    .demo-top button {
+        flex: 1;
+        min-width: 0;
+        padding: 11px 8px;
+        font-size: 13px;
+    }
+
+    /* ETA panels stack */
+    .simgrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .panel {
+        padding: 16px;
+    }
+
+    .big {
+        font-size: 28px;
+    }
+
+    /* Metrics don't overflow */
+    .metric {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .metric span {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .metric b {
+        text-align: right;
+    }
+
+    /* Demo progress bar */
+    .progress {
+        margin: 12px 0;
+    }
+
+    /* Cards */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    /* Event box */
+    .event {
+        font-size: 13px;
+        padding: 11px;
+    }
+
+    footer {
+        font-size: 13px;
+        padding: 20px 10px;
+    }
+}
 </style>
 </head>
 <body>
