@@ -500,32 +500,6 @@ The architecture is designed to demonstrate how such data could be processed by 
 
 ---
 
-# ▶️ Running the Prototype
-
-Clone the repository:
-
-```bash
-git clone <repository-url>
-```
-
-Open the project folder:
-
-```bash
-cd <project-folder>
-```
-
-Run the prototype by opening:
-
-```text
-index.html
-```
-
-in a modern web browser.
-
-No backend server is currently required for the prototype.
-
----
-
 # 👨‍💻 Author
 
 **Ronit Godambe**
